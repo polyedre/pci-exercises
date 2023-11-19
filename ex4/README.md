@@ -56,48 +56,13 @@ content of the commits 'B' and 'F' on both branches is similar.
 
 ## Merging vs Rebasing
 
-According to the git manual, when merging stein on queens, git replays the
-changes made on stein from 'A', and will create a commit with the diff.
+When merging stein on queens, git create a commit with the diff between the two branches. All the lines that are present on HEAD but not in the target branch are automatically added, and lines present in the target branch but not in HEAD are part of the diff. As a result, the branch `merged` contains the files of `stein`, without the lines that were removed on `stein` but not on `merged`.
 
 When rebasing, git switches to the target branch (stein) and then *replays* the
 commits of the current branch (queens). In our case, git replayed B and F on
 commit 1ff2641. There was no difference with 'B' (same content and same
-history), the commit 'B' of branch queens was skipped automatically.
-
-The diff can be explained **by the order on which commits were used** when
-building the result history:
-
-- When merging, the order of commits applied to the final filesystem is:
-
-   1ff2641: G stein
-   cf24853: F stein
-   3fcdfa0: E stein
-   cb8c71a: D stein
-   849ef26: C stein
-   372c155: B stein
-   2624c16: F queen
-   5e3521b: B queen
-   edc8ed7: A common
-
-  This means that commits C, D and E of stein were applied **after** 'F queen'.
-
-- When rebasing, 'B queen' was applied after 'B stein', and 'F queen' after 'F stein':
-
-   2624c16: F queen
-   5e3521b: B queen
-   1ff2641: G stein
-   cf24853: F stein
-   3fcdfa0: E stein
-   cb8c71a: D stein
-   849ef26: C stein
-   372c155: B stein
-   edc8ed7: A common
-   
-   This explains why the diff between `upstream/stein` and `rebased` is empty.
+history), the commit 'B' of branch queens was skipped automatically. As a result, the branch `rebased` has the same history as `stein`.
 
 ## Conclusion
 
-My conclusion is that the two methods differs by the order in which the commits are applied.
-
-Edit: After a small test, it seems that while I guessed that merging `queens` on `stein` would result in the same filesystem as the rebase, the commits from merging `queens` on `stein` and `stein` on `queens` have the same content. This invalidates my theory.
-
+To conclude, the branches `merged` and `rebased` differs because the merge command keeps the lines of HEAD that are removed on the target branch.
